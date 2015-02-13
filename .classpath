@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="dist/libs/mmocore.jar"/>
+	<classpathentry kind="lib" path="dist/libs/javolution-5.5.1.jar"/>
+	<classpathentry kind="lib" path="dist/libs/c3p0-0.9.5.jar"/>
+	<classpathentry kind="lib" path="dist/libs/mail-1.5.2.jar"/>
+	<classpathentry kind="lib" path="dist/libs/weupnp-0.1.3.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="MailList.xsd">
+	<mail id="SATempBan" file="html/SecAuthTempBan.htm" subject="Your account has been temporarily suspended" />
+</list>

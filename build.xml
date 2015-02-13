@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="L2J_Server" default="build" basedir=".">
+	<description>
+		Copyright (C) 2004-2015 L2J Server
+		
+		This script will build the L2J Login Server.
+
+		This program is free software; you can redistribute it and/or modify
+		it under the terms of the GNU General Public License as published by
+		the Free Software Foundation; either version 3, or (at your option)
+		any later version.
+
+		This program is distributed in the hope that it will be useful,
+		but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+		GNU General Public License for more details.
+
+		You should have received a copy of the GNU General Public License
+		along with this program; if not, write to the Free Software
+		Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+		02111-1307, USA.
+
+		http://www.gnu.org/copyleft/gpl.html
+	</description>
+
+	<property name="build" location="build" />
+	<property name="build.bin" location="${build}/bin" />
+	<property name="build.dist" location="${build}/dist" />
+	<property name="libs" location="dist/libs" />
+	<property name="src" location="src/main/java" />
+
+	<path id="classpath">
+		<fileset dir="${libs}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="checkRequirements" description="Check Requirements.">
+		<fail message="Ant 1.8.2 is required. But your version is ${ant.version} and if you are using Eclipse probably is outdated.">
+			<condition>
+				<not>
+					<antversion atleast="1.8.2" />
+				</not>
+			</condition>
+		</fail>
+		<available classname="java.util.stream.Stream" property="JDK8.present" />
+		<fail unless="JDK8.present" message="Java 1.8 is required. But your version is Java ${ant.java.version} and probably JDK is not installed." />
+	</target>
+
+	<target name="init" depends="checkRequirements" description="Create the output directories.">
+		<delete dir="${build.bin}" quiet="true" />
+		<mkdir dir="${build.bin}" />
+	</target>
+
+	<target name="dist" depends="init" description="Export the files to the output directory.">
+		<sync todir="${build.dist}" includeemptydirs="true">
+			<fileset dir="dist" />
+		</sync>
+	</target>
+
+	<target name="compile" depends="dist" description="Compile the source.">
+		<javac srcdir="${src}" classpathref="classpath" destdir="${build.bin}" compiler="modern" debug="true" debuglevel="lines,vars,source" includeantruntime="false" source="1.8" target="1.8" />
+	</target>
+
+	<target name="jar" depends="compile" description="Create the jar.">
+		<tstamp>
+			<format property="time.stamp" pattern="yyyy-MM-dd HH:mm:ss" />
+		</tstamp>
+
+		<jar destfile="${build.dist}/L2JLoginServer.jar" level="9">
+			<fileset dir="${build.bin}" />
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Built-Date" value="${time.stamp}" />
+				<attribute name="Implementation-URL" value="http://www.l2jserver.com/" />
+				<attribute name="Class-Path" value="libs/c3p0-0.9.5.jar libs/javolution-5.5.1.jar libs/mail-1.5.2.jar libs/mmocore.jar libs/mysql-connector-java-5.1.34-bin.jar libs/weupnp-0.1.3.jar" />
+				<attribute name="Main-Class" value="com.l2jserver.login.L2LoginServer" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="build" depends="jar" description="Create the Zip file.">
+		<tstamp>
+			<format property="build.date" pattern="yyyy-MM-dd"/>
+		</tstamp>
+		<zip destfile="${build}/L2J_LoginServer_${build.date}.zip" basedir="${build.dist}" level="9" />
+	</target>
+</project>
