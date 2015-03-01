@@ -21,14 +21,13 @@ package com.l2jserver.login.network;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
-import org.mmocore.network.IPacketHandler;
-import org.mmocore.network.ReceivablePacket;
-
 import com.l2jserver.login.network.L2LoginClient.LoginClientState;
 import com.l2jserver.login.network.clientpackets.AuthGameGuard;
 import com.l2jserver.login.network.clientpackets.RequestAuthLogin;
 import com.l2jserver.login.network.clientpackets.RequestServerList;
 import com.l2jserver.login.network.clientpackets.RequestServerLogin;
+import com.l2jserver.mmocore.IPacketHandler;
+import com.l2jserver.mmocore.ReceivablePacket;
 
 /**
  * Handler for packets received by Login Server

@@ -16,15 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.l2jserver.login.network.serverpackets;
+package com.l2jserver.util.files.filters;
 
-import com.l2jserver.login.network.L2LoginClient;
-import com.l2jserver.mmocore.SendablePacket;
+import java.io.File;
+import java.io.FileFilter;
 
 /**
- * @author KenM
+ * Specialized {@link FileFilter} class.<br>
+ * Accepts files ending with ".xml" only.
+ * @author mrTJO
  */
-public abstract class L2LoginServerPacket extends SendablePacket<L2LoginClient>
+public class XMLFilter implements FileFilter
 {
-	
+	@Override
+	public boolean accept(File f)
+	{
+		if ((f == null) || !f.isFile())
+		{
+			return false;
+		}
+		return f.getName().toLowerCase().endsWith(".xml");
+	}
 }

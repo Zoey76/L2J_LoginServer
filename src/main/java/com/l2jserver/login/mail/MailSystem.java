@@ -22,35 +22,25 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import javolution.util.FastMap;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.l2jserver.login.Config;
+import com.l2jserver.util.IXmlReader;
 
 /**
  * @author mrTJO
  */
-public class MailSystem
+public class MailSystem implements IXmlReader
 {
-	private static final Logger _log = Logger.getLogger(MailSystem.class.getName());
-	private final Map<String, MailContent> _mailData = new FastMap<>();
-	
-	public static MailSystem getInstance()
-	{
-		return SingletonHolder._instance;
-	}
+	private final Map<String, MailContent> _mailData = new HashMap<>();
 	
 	public MailSystem()
 	{
-		loadMails();
+		load();
 	}
 	
 	public void sendMail(String account, String messageId, String... args)
@@ -59,61 +49,45 @@ public class MailSystem
 		mail.run();
 	}
 	
-	private void loadMails()
+	@Override
+	public void load()
 	{
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setValidating(false);
-		factory.setIgnoringComments(true);
-		File file = new File(Config.DATAPACK_ROOT, "data/mail/MailList.xml");
-		Document doc = null;
-		if (file.exists())
+		_mailData.clear();
+		parseDatapackFile("data/mail/MailList.xml");
+		LOGGER.info("eMail System Loaded");
+	}
+	
+	@Override
+	public void parseDocument(Document doc)
+	{
+		for (Node d = doc.getFirstChild().getFirstChild(); d != null; d = d.getNextSibling())
 		{
-			try
+			if (d.getNodeName().equals("mail"))
 			{
-				doc = factory.newDocumentBuilder().parse(file);
-			}
-			catch (Exception e)
-			{
-				_log.log(Level.WARNING, "Could not parse MailList.xml file: " + e.getMessage(), e);
-				return;
-			}
-			
-			Node n = doc.getFirstChild();
-			File mailFile;
-			for (Node d = n.getFirstChild(); d != null; d = d.getNextSibling())
-			{
-				if (d.getNodeName().equals("mail"))
+				String mailId = d.getAttributes().getNamedItem("id").getNodeValue();
+				String subject = d.getAttributes().getNamedItem("subject").getNodeValue();
+				String maFile = d.getAttributes().getNamedItem("file").getNodeValue();
+				
+				File mailFile = new File(Config.DATAPACK_ROOT, "data/mail/" + maFile);
+				try (FileInputStream fis = new FileInputStream(mailFile);
+					BufferedInputStream bis = new BufferedInputStream(fis))
 				{
-					String mailId = d.getAttributes().getNamedItem("id").getNodeValue();
-					String subject = d.getAttributes().getNamedItem("subject").getNodeValue();
-					String maFile = d.getAttributes().getNamedItem("file").getNodeValue();
+					int bytes = bis.available();
+					byte[] raw = new byte[bytes];
 					
-					mailFile = new File(Config.DATAPACK_ROOT, "data/mail/" + maFile);
-					try (FileInputStream fis = new FileInputStream(mailFile);
-						BufferedInputStream bis = new BufferedInputStream(fis))
-					{
-						int bytes = bis.available();
-						byte[] raw = new byte[bytes];
-						
-						bis.read(raw);
-						String html = new String(raw, "UTF-8");
-						html = html.replaceAll(Config.EOL, "\n");
-						html = html.replace("%servermail%", Config.EMAIL_SERVERINFO_ADDRESS);
-						html = html.replace("%servername%", Config.EMAIL_SERVERINFO_NAME);
-						
-						_mailData.put(mailId, new MailContent(subject, html));
-					}
-					catch (IOException e)
-					{
-						_log.warning("IOException while reading " + maFile);
-					}
+					bis.read(raw);
+					String html = new String(raw, "UTF-8");
+					html = html.replaceAll(Config.EOL, "\n");
+					html = html.replace("%servermail%", Config.EMAIL_SERVERINFO_ADDRESS);
+					html = html.replace("%servername%", Config.EMAIL_SERVERINFO_NAME);
+					
+					_mailData.put(mailId, new MailContent(subject, html));
+				}
+				catch (IOException e)
+				{
+					LOGGER.warning("IOException while reading " + maFile);
 				}
 			}
-			_log.info("eMail System Loaded");
-		}
-		else
-		{
-			_log.warning("Cannot load eMail System - Missing file MailList.xml");
 		}
 	}
 	
@@ -146,6 +120,11 @@ public class MailSystem
 	public MailContent getMailContent(String mailId)
 	{
 		return _mailData.get(mailId);
+	}
+	
+	public static MailSystem getInstance()
+	{
+		return SingletonHolder._instance;
 	}
 	
 	private static class SingletonHolder

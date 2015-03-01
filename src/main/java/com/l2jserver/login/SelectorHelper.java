@@ -23,14 +23,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.mmocore.network.IAcceptFilter;
-import org.mmocore.network.IClientFactory;
-import org.mmocore.network.IMMOExecutor;
-import org.mmocore.network.MMOConnection;
-import org.mmocore.network.ReceivablePacket;
-
 import com.l2jserver.login.network.L2LoginClient;
 import com.l2jserver.login.network.serverpackets.Init;
+import com.l2jserver.mmocore.IAcceptFilter;
+import com.l2jserver.mmocore.IClientFactory;
+import com.l2jserver.mmocore.IMMOExecutor;
+import com.l2jserver.mmocore.MMOConnection;
+import com.l2jserver.mmocore.ReceivablePacket;
 import com.l2jserver.util.network.IPv4Filter;
 
 /**

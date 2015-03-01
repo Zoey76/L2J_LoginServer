@@ -32,12 +32,11 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.mmocore.network.SelectorConfig;
-import org.mmocore.network.SelectorThread;
-
 import com.l2jserver.login.mail.MailSystem;
 import com.l2jserver.login.network.L2LoginClient;
 import com.l2jserver.login.network.L2LoginPacketHandler;
+import com.l2jserver.mmocore.SelectorConfig;
+import com.l2jserver.mmocore.SelectorThread;
 import com.l2jserver.util.db.L2DatabaseFactory;
 import com.l2jserver.util.network.UPnPService;
 

@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
-
-import javolution.util.FastList;
 
 import com.l2jserver.util.Rnd;
 
@@ -40,7 +40,30 @@ public class Status extends Thread
 	
 	private final int _uptime;
 	private String _statusPw;
-	private final List<LoginStatusThread> _loginStatus;
+	private final List<LoginStatusThread> _loginStatus = new CopyOnWriteArrayList<>();
+	
+	public Status() throws IOException
+	{
+		super("Status");
+		
+		Properties telnetSettings = new Properties();
+		try (InputStream is = new FileInputStream(new File(Config.TELNET_FILE)))
+		{
+			telnetSettings.load(is);
+		}
+		int statusPort = Integer.parseInt(telnetSettings.getProperty("StatusPort", "12345"));
+		_statusPw = telnetSettings.getProperty("StatusPW");
+		if (_statusPw == null)
+		{
+			_log.info("Server's Telnet Function Has No Password Defined!");
+			_log.info("A Password Has Been Automaticly Created!");
+			_statusPw = rndPW(10);
+			_log.info("Password Has Been Set To: " + _statusPw);
+		}
+		_log.info("Telnet StatusServer started successfully, listening on Port: " + statusPort);
+		statusServerSocket = new ServerSocket(statusPort);
+		_uptime = (int) System.currentTimeMillis();
+	}
 	
 	@Override
 	public void run()
@@ -89,30 +112,6 @@ public class Status extends Thread
 		}
 	}
 	
-	public Status() throws IOException
-	{
-		super("Status");
-		
-		Properties telnetSettings = new Properties();
-		try (InputStream is = new FileInputStream(new File(Config.TELNET_FILE)))
-		{
-			telnetSettings.load(is);
-		}
-		int statusPort = Integer.parseInt(telnetSettings.getProperty("StatusPort", "12345"));
-		_statusPw = telnetSettings.getProperty("StatusPW");
-		if (_statusPw == null)
-		{
-			_log.info("Server's Telnet Function Has No Password Defined!");
-			_log.info("A Password Has Been Automaticly Created!");
-			_statusPw = rndPW(10);
-			_log.info("Password Has Been Set To: " + _statusPw);
-		}
-		_log.info("Telnet StatusServer started successfully, listening on Port: " + statusPort);
-		statusServerSocket = new ServerSocket(statusPort);
-		_uptime = (int) System.currentTimeMillis();
-		_loginStatus = new FastList<>();
-	}
-	
 	private String rndPW(int length)
 	{
 		final String lowerChar = "qwertyuiopasdfghjklzxcvbnm";
@@ -141,7 +140,7 @@ public class Status extends Thread
 	
 	public void sendMessageToTelnets(String msg)
 	{
-		List<LoginStatusThread> lsToRemove = new FastList<>();
+		List<LoginStatusThread> lsToRemove = new ArrayList<>(); // TODO: Unused?
 		for (LoginStatusThread ls : _loginStatus)
 		{
 			if (ls.isInterrupted())
