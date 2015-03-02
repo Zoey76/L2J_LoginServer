@@ -34,9 +34,9 @@ import com.l2jserver.login.GameServerTable.GameServerInfo;
 import com.l2jserver.login.network.L2JGameServerPacketHandler;
 import com.l2jserver.login.network.L2JGameServerPacketHandler.GameServerState;
 import com.l2jserver.login.network.loginserverpackets.ChangePasswordResponse;
-import com.l2jserver.login.network.loginserverpackets.InitLS;
 import com.l2jserver.login.network.loginserverpackets.KickPlayer;
 import com.l2jserver.login.network.loginserverpackets.LoginServerFail;
+import com.l2jserver.login.network.loginserverpackets.PublicKey;
 import com.l2jserver.login.network.loginserverpackets.RequestCharacters;
 import com.l2jserver.util.Util;
 import com.l2jserver.util.crypt.NewCrypt;
@@ -78,10 +78,9 @@ public class GameServerThread extends Thread
 			return;
 		}
 		
-		InitLS startPacket = new InitLS(_publicKey.getModulus().toByteArray());
 		try
 		{
-			sendPacket(startPacket);
+			sendPacket(new PublicKey(_publicKey.getModulus().toByteArray()));
 			
 			int lengthHi = 0;
 			int lengthLo = 0;

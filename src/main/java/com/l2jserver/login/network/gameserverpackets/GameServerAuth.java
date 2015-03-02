@@ -54,6 +54,7 @@ public class GameServerAuth extends BaseRecievePacket
 	private final boolean _hostReserved;
 	private final boolean _acceptAlternativeId;
 	private final int _maxPlayers;
+	private final int _protocol;
 	private final int _port;
 	private final String[] _hosts;
 	
@@ -70,6 +71,7 @@ public class GameServerAuth extends BaseRecievePacket
 		_hostReserved = (readC() == 0 ? false : true);
 		_port = readH();
 		_maxPlayers = readD();
+		_protocol = readD();
 		int size = readD();
 		_hexId = readB(size);
 		size = 2 * readD();
@@ -86,12 +88,10 @@ public class GameServerAuth extends BaseRecievePacket
 		
 		if (handleRegProcess())
 		{
-			AuthResponse ar = new AuthResponse(server.getGameServerInfo().getId());
-			server.sendPacket(ar);
-			if (Config.DEBUG)
-			{
-				_log.info("Authed: id: " + server.getGameServerInfo().getId());
-			}
+			server.sendPacket(new AuthResponse(server.getGameServerInfo().getId()));
+			
+			_log.info("Game Server " + Config.ALLOWED_PROTOCOLS.get(_protocol) + " Authed: ID: " + server.getGameServerInfo().getId());
+			
 			server.broadcastToTelnet("GameServer [" + server.getServerId() + "] " + GameServerTable.getInstance().getServerNameById(server.getServerId()) + " is connected");
 			server.setLoginConnectionState(GameServerState.AUTHED);
 		}
@@ -99,6 +99,13 @@ public class GameServerAuth extends BaseRecievePacket
 	
 	private boolean handleRegProcess()
 	{
+		// Allow only known protocols.
+		if (!Config.ALLOWED_PROTOCOLS.containsKey(_protocol))
+		{
+			_server.forceClose(LoginServerFail.REASON_INVALID_PROTOCOL);
+			return false;
+		}
+		
 		GameServerTable gameServerTable = GameServerTable.getInstance();
 		
 		int id = _desiredId;
@@ -116,7 +123,7 @@ public class GameServerAuth extends BaseRecievePacket
 				{
 					if (gsi.isAuthed())
 					{
-						_server.forceClose(LoginServerFail.REASON_ALREADY_LOGGED8IN);
+						_server.forceClose(LoginServerFail.REASON_ALREADY_LOGGED_IN);
 						return false;
 					}
 					_server.attachGameServerInfo(gsi, _port, _hosts, _maxPlayers);

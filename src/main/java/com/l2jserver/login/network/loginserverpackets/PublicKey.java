@@ -18,24 +18,23 @@
  */
 package com.l2jserver.login.network.loginserverpackets;
 
-import com.l2jserver.login.L2LoginServer;
 import com.l2jserver.util.network.packets.BaseSendablePacket;
 
 /**
- * @author -Wooden-
+ * Public Key.
+ * 
+ * <pre>
+ * C ID 0x00
+ * D key size
+ * B key
+ * </pre>
+ * @author -Wooden-, Zoey76
  */
-public class InitLS extends BaseSendablePacket
+public class PublicKey extends BaseSendablePacket
 {
-	// ID 0x00
-	// format
-	// d proto rev
-	// d key size
-	// b key
-	
-	public InitLS(byte[] publickey)
+	public PublicKey(byte[] publickey)
 	{
 		writeC(0x00);
-		writeD(L2LoginServer.PROTOCOL_REV);
 		writeD(publickey.length);
 		writeB(publickey);
 	}

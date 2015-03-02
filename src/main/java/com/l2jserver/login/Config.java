@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +47,7 @@ public final class Config
 	public static final String TELNET_FILE = "./config/Telnet.properties";
 	private static final String MMO_CONFIG_FILE = "./config/MMO.properties";
 	private static final String EMAIL_CONFIG_FILE = "./config/Email.properties";
+	private static final String PROTOCOL_CONFIG_FILE = "./config/Protocol.properties";
 	
 	// --------------------------------------------------
 	// General Settings
@@ -68,6 +71,10 @@ public final class Config
 	public static File DATAPACK_ROOT;
 	public static boolean LOGIN_SERVER_SCHEDULE_RESTART;
 	public static long LOGIN_SERVER_SCHEDULE_RESTART_TIME;
+	// --------------------------------------------------
+	// Protocol Settings
+	// --------------------------------------------------
+	public static final Map<Integer, String> ALLOWED_PROTOCOLS = new HashMap<>();
 	// --------------------------------------------------
 	// MMO Settings
 	// --------------------------------------------------
@@ -187,6 +194,24 @@ public final class Config
 		EMAIL_SYS_ADDRESS = emailSettings.getString("EmailSystemAddress", "noreply@myl2jserver.com");
 		EMAIL_SYS_SELECTQUERY = emailSettings.getString("EmailDBSelectQuery", "SELECT value FROM account_data WHERE account_name=? AND var='email_addr'");
 		EMAIL_SYS_DBFIELD = emailSettings.getString("EmailDBField", "value");
+		
+		// Protocol
+		final PropertiesParser protocolSettings = new PropertiesParser(PROTOCOL_CONFIG_FILE);
+		final String allProtocols = "Prelude, C1, C2, C3, C4, C5, Interlude, Kamael, Hellbound, Gracia1, Gracia2, GraciaFinal, Epilogue, Freya, HighFive, Awakening, Harmony, Tauti, GloryDays, Livindor, Valiance, Ertheia";
+		String allowedProtocolList = protocolSettings.getString("AllowedProtocols", allProtocols);
+		if (allowedProtocolList.equals("All"))
+		{
+			allowedProtocolList = allProtocols;
+		}
+		final String[] protocols = allowedProtocolList.replace(" ", "").split(",");
+		for (String protocolName : protocols)
+		{
+			final int protocol = Integer.decode(protocolSettings.getString(protocolName, "-1"));
+			if (protocol >= 0)
+			{
+				ALLOWED_PROTOCOLS.put(protocol, protocolName);
+			}
+		}
 	}
 	
 	/**
